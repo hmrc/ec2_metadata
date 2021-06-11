@@ -6,6 +6,8 @@ import sys
 from typing import Dict
 
 import requests
+from requests.packages.urllib3 import Retry
+from requests.adapters import HTTPAdapter
 
 
 def instance_identity_document() -> Dict[str, str]:
@@ -51,7 +53,15 @@ def ec2_metadata(key: str) -> str:
 
 
 def imds(path):
+    retry_strategy = Retry(
+        total=50,
+        backoff_factor=0.01
+    )
+    adapter = HTTPAdapter(max_retries=retry_strategy)
+
     http = requests.Session()
+    http.mount("https://", adapter)
+    http.mount("http://", adapter)
 
     token_response = http.put(
         f'http://169.254.169.254/latest/api/token',
