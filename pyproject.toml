@@ -1,0 +1,24 @@
+[tool.poetry]
+name = "ec2_metadata"
+version = "0.1.0"
+description = "Allows querying EC2 instance metadata"
+authors = ["HMRC WebOps"]
+
+[tool.poetry.dependencies]
+python = "^3.9"
+requests = "^2.25.1"
+
+[tool.poetry.dev-dependencies]
+pytest = "^6.2.4"
+black = "^21.6b0"
+httpretty = "^1.1.3"
+bandit = "^1.7.0"
+safety = "^1.10.3"
+mock = "^4.0.3"
+mypy = "^0.902"
+flake8 = "^3.9.2"
+pycodestyle = "^2.7.0"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"

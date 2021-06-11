@@ -7,8 +7,8 @@ setup(
     entry_points={
         "console_scripts": [
             "ec2-metadata=ec2_metadata:main",
-            "instance-identity=ec2_metadata:main"
+            "instance-identity=ec2_metadata:main",
         ]
     },
-    install_requires=["requests"]
+    install_requires=["requests"],
 )
