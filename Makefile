@@ -43,3 +43,19 @@ clean:
 	rm -rf ./mdtp_ec2_metadata.egg-info
 	rm -f .coverage
 .PHONY: clean
+
+build:
+	poetry build
+.PHONY: build
+
+publish: build
+	poetry config repositories.custom ${REPOSITORY_URL}
+    ifneq ('$(REPOSITORY_USER)','')
+        ifneq ('$(REPOSITORY_PASS)','')
+	        @poetry config http-basic.custom ${REPOSITORY_USER} ${REPOSITORY_PASS}
+        endif
+    endif
+	poetry publish -r custom
+	poetry config http-basic.custom --unset
+	poetry config repositories.custom --unset
+.PHONY: publish
