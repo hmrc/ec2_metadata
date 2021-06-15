@@ -36,7 +36,7 @@ test: init black pytest safety
 .PHONY: test
 
 safety:
-	poetry run bandit ec2_metadata.py
+	poetry run bandit query_ec2_metadata.py
 	poetry run safety check -i 38053
 
 clean:
