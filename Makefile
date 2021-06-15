@@ -49,13 +49,5 @@ build:
 .PHONY: build
 
 publish: build
-	poetry config repositories.custom ${REPOSITORY_URL}
-    ifneq ('$(REPOSITORY_USER)','')
-        ifneq ('$(REPOSITORY_PASS)','')
-	        @poetry config http-basic.custom ${REPOSITORY_USER} ${REPOSITORY_PASS}
-        endif
-    endif
-	poetry publish -r custom
-	poetry config http-basic.custom --unset
-	poetry config repositories.custom --unset
+	@poetry publish --username ${PYPI_USERNAME} --password ${PYPI_PASSWORD}
 .PHONY: publish
