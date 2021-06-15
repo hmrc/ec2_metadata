@@ -43,3 +43,11 @@ clean:
 	rm -rf ./mdtp_ec2_metadata.egg-info
 	rm -f .coverage
 .PHONY: clean
+
+build:
+	poetry build
+.PHONY: build
+
+publish: build
+	@poetry publish --username ${PYPI_USERNAME} --password ${PYPI_PASSWORD}
+.PHONY: publish
