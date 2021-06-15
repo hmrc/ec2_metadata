@@ -4,7 +4,7 @@ import httpretty
 import requests
 import sys
 
-from ec2_metadata import (
+from query_ec2_metadata import (
     main,
     imds,
     instance_identity,
@@ -80,7 +80,7 @@ def test_imds_raises_on_bad_response_code():
         imds("/meta-data/hostname")
 
 
-@mock.patch("ec2_metadata.instance_identity")
+@mock.patch("query_ec2_metadata.instance_identity")
 def test_main_returns_id_key(mock_id, capsys):
     mock_id.return_value = "identity_document"
     testargs = ["instance-identity", "KEY"]
@@ -93,7 +93,7 @@ def test_main_returns_id_key(mock_id, capsys):
     mock_id.assert_called_with("KEY")
 
 
-@mock.patch("ec2_metadata.ec2_metadata")
+@mock.patch("query_ec2_metadata.ec2_metadata")
 def test_main_returns_metadata(mock_ec2_meta, capsys):
     mock_ec2_meta.return_value = "metadata"
     testargs = ["ec2-metadata", "KEY"]
@@ -106,20 +106,20 @@ def test_main_returns_metadata(mock_ec2_meta, capsys):
     mock_ec2_meta.assert_called_with("KEY")
 
 
-@mock.patch("ec2_metadata.imds")
+@mock.patch("query_ec2_metadata.imds")
 def test_instance_identity_document_returns_id_doc(mock_imds):
     mock_imds.return_value = '{"test_key": "test_value"}'
     assert instance_identity_document() == {"test_key": "test_value"}
     mock_imds.assert_called_with("/dynamic/instance-identity/document")
 
 
-@mock.patch("ec2_metadata.instance_identity_document")
+@mock.patch("query_ec2_metadata.instance_identity_document")
 def test_instance_identity_returns_id_key(mock_id_doc):
     mock_id_doc.return_value = {"test_key": "test_value"}
     assert instance_identity("test_key") == "test_value"
 
 
-@mock.patch("ec2_metadata.imds")
+@mock.patch("query_ec2_metadata.imds")
 def test_ec2_metadata_returns_id_key(mock_imds):
     assert ec2_metadata("key") == mock_imds.return_value
     mock_imds.assert_called_with("/meta-data/key")

@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "ec2_metadata"
+name = "query_ec2_metadata"
 version = "0.1.0"
 description = "Allows querying EC2 instance metadata"
 authors = ["HMRC WebOps"]
@@ -20,8 +20,8 @@ flake8 = "^3.9.2"
 pycodestyle = "^2.7.0"
 
 [tool.poetry.scripts]
-ec2-metadata = 'ec2_metadata:main'
-instance-identity = 'ec2_metadata:main'
+ec2-metadata = 'query_ec2_metadata:main'
+instance-identity = 'query_ec2_metadata:main'
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
