@@ -130,5 +130,5 @@ def test_ec2_metadata_does_not_return_secure_creds():
         ec2_metadata("iam/security-credentials/test_creds")
     assert (
         e.__str__()
-        == "<ExceptionInfo Exception('iam/security-credentials/test_creds not available using this tool') tblen=2>"
+        == "<ExceptionInfo Exception('iam/security-credentials/test_creds not available using this tool',) tblen=2>"
     )
