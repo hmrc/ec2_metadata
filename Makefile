@@ -18,18 +18,21 @@ check_python:
     endif
 .PHONY: check_python
 
-black: check_python
+black:
 	poetry run black *.py
 .PHONY: black
 
 init: check_python
-	pip install pip -U
-	pip install poetry==1.1.6
+	pip install --upgrade pip
+	pip install --upgrade poetry
 	export POETRY_VIRTUALENVS_IN_PROJECT=true && poetry install
 .PHONY: init
 
-test: init black safety
-	export PYTHONPATH="${PYTHONPATH}:`pwd`/" && poetry run pytest -v
+pytest:
+	poetry run pytest -v
+.PHONY: pytest
+
+test: init black pytest safety
 .PHONY: test
 
 safety:
@@ -44,10 +47,10 @@ clean:
 	rm -f .coverage
 .PHONY: clean
 
-build: init
+build:
 	poetry build
 .PHONY: build
 
-publish: build all_tests
+publish: test build
 	@poetry publish --username ${PYPI_USERNAME} --password ${PYPI_PASSWORD}
 .PHONY: publish
