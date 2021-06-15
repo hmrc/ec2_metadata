@@ -23,16 +23,16 @@ black: check_python
 .PHONY: black
 
 init: check_python
+	pip install pip -U
 	pip install poetry==1.1.6
-	poetry run pip install pip -U
 	export POETRY_VIRTUALENVS_IN_PROJECT=true && poetry install
 .PHONY: init
 
-test: check_python black
+test: init black safety
 	export PYTHONPATH="${PYTHONPATH}:`pwd`/" && poetry run pytest -v
 .PHONY: test
 
-all_tests: black test
+safety:
 	poetry run bandit ec2_metadata.py
 	poetry run safety check -i 38053
 
@@ -44,10 +44,10 @@ clean:
 	rm -f .coverage
 .PHONY: clean
 
-build:
+build: init
 	poetry build
 .PHONY: build
 
-publish: build
+publish: build all_tests
 	@poetry publish --username ${PYPI_USERNAME} --password ${PYPI_PASSWORD}
 .PHONY: publish
