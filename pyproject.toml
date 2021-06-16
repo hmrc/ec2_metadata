@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "query_ec2_metadata"
-version = "0.1.2"
+version = "0.1.3"
 description = "Allows querying EC2 instance metadata"
 authors = ["HMRC WebOps"]
 license = "Apache-2.0"
