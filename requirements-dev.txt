@@ -1,0 +1,6 @@
+black
+bandit
+safety
+mypy
+flake8
+pycodestyle

@@ -33,14 +33,14 @@ def instance_tags_ec2() -> Dict[str, str]:
 
     paginator = ec2.get_paginator("describe_tags")
 
-    tags = {}
+    tags: Dict[str, str] = {}
     for page in paginator.paginate(Filters=[id_filter]):
         tags |= {tag["Key"]: tag["Value"] for tag in page["Tags"]}
     return tags
 
 
 def instance_tags_enabled() -> bool:
-    """ "
+    """
     Detect if tags in instance metadata is enabled
     """
 
