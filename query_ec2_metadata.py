@@ -10,6 +10,7 @@ from requests import HTTPError
 from requests.packages.urllib3 import Retry
 from requests.adapters import HTTPAdapter
 
+
 def instance_tags_ec2() -> Dict[str, str]:
     """
     All tags on this instance
@@ -26,27 +27,25 @@ def instance_tags_ec2() -> Dict[str, str]:
 
     import boto3
 
-    ec2 = boto3.client('ec2', region_name=ec2_metadata('placement/region'))
+    ec2 = boto3.client("ec2", region_name=ec2_metadata("placement/region"))
 
-    id_filter = {
-        'Name': 'resource-id',
-        'Values': [ec2_metadata('instance-id')]
-    }
+    id_filter = {"Name": "resource-id", "Values": [ec2_metadata("instance-id")]}
 
-    paginator = ec2.get_paginator('describe_tags')
+    paginator = ec2.get_paginator("describe_tags")
 
     tags = {}
     for page in paginator.paginate(Filters=[id_filter]):
-        tags |= {tag['Key']: tag['Value'] for tag in page['Tags']}
+        tags |= {tag["Key"]: tag["Value"] for tag in page["Tags"]}
     return tags
 
+
 def instance_tags_enabled() -> bool:
-    """"
+    """ "
     Detect if tags in instance metadata is enabled
     """
 
     try:
-        ec2_metadata('tags')
+        ec2_metadata("tags")
     except HTTPError as http_error:
         if http_error.response.status_code == 404:
             # Tags in instance metadata is not enabled
@@ -54,6 +53,7 @@ def instance_tags_enabled() -> bool:
         raise
 
     return True
+
 
 def instance_tags() -> Dict[str, str]:
     """
@@ -69,10 +69,11 @@ def instance_tags() -> Dict[str, str]:
     if instance_tags_enabled():
         return {
             tag_name: instance_tag(tag_name)
-            for tag_name in ec2_metadata('tags/instance').splitlines()
+            for tag_name in ec2_metadata("tags/instance").splitlines()
         }
     else:
         return instance_tags_ec2()
+
 
 def instance_tag(tag: str) -> str:
     """
@@ -84,9 +85,10 @@ def instance_tag(tag: str) -> str:
     """
 
     if instance_tags_enabled():
-        return ec2_metadata(f'tags/instance/{tag}')
+        return ec2_metadata(f"tags/instance/{tag}")
     else:
         return instance_tags_ec2()[tag]
+
 
 def instance_identity_document() -> Dict[str, str]:
     """

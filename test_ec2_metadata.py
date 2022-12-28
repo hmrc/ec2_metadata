@@ -15,7 +15,9 @@ from query_ec2_metadata import (
     instance_identity_document,
     ec2_metadata,
     instance_tags_enabled,
-    instance_tag, instance_tags, instance_tags_ec2
+    instance_tag,
+    instance_tags,
+    instance_tags_ec2,
 )
 
 
@@ -127,7 +129,7 @@ def test_main_returns_tag(mock_ec2_meta, capsys):
 
 @mock.patch("query_ec2_metadata.instance_tag")
 def test_main_returns_empty_when_no_tag(mock_ec2_meta, capsys):
-    mock_ec2_meta.side_effect = KeyError('KEY')
+    mock_ec2_meta.side_effect = KeyError("KEY")
     testargs = ["instance-tag", "KEY"]
 
     with mock.patch.object(sys, "argv", testargs):
@@ -163,7 +165,7 @@ def test_ec2_metadata_returns_id_key(mock_imds):
 def test_ec2_metadata_does_not_return_secure_creds():
     with pytest.raises(Exception) as e:
         ec2_metadata("iam/security-credentials/test_creds")
-    assert 'iam/security-credentials/test_creds not available using this tool' in str(e)
+    assert "iam/security-credentials/test_creds not available using this tool" in str(e)
 
 
 @mock.patch("query_ec2_metadata.ec2_metadata")
@@ -187,10 +189,10 @@ def test_instance_tags_disabled(mock_ec2_meta):
 @mock.patch("query_ec2_metadata.instance_tags_enabled")
 def test_instance_tag_metadata(instance_tags_enabled, ec2_metadata, instance_tags_ec2):
     instance_tags_enabled.return_value = True
-    ec2_metadata.return_value = 'TestInstance'
+    ec2_metadata.return_value = "TestInstance"
 
-    assert instance_tag('Name') == 'TestInstance'
-    ec2_metadata.assert_called_once_with('tags/instance/Name')
+    assert instance_tag("Name") == "TestInstance"
+    ec2_metadata.assert_called_once_with("tags/instance/Name")
     instance_tags_ec2.assert_not_called()
 
 
@@ -200,12 +202,12 @@ def test_instance_tag_metadata(instance_tags_enabled, ec2_metadata, instance_tag
 def test_instance_tag_ec2(instance_tags_enabled, ec2_metadata, instance_tags_ec2):
     instance_tags_enabled.return_value = False
     instance_tags_ec2.return_value = {
-        'Env': 'Test',
-        'Name': 'TestInstance',
-        'Type': 'Irrelevant'
+        "Env": "Test",
+        "Name": "TestInstance",
+        "Type": "Irrelevant",
     }
 
-    assert instance_tag('Name') == 'TestInstance'
+    assert instance_tag("Name") == "TestInstance"
 
     ec2_metadata.assert_not_called()
 
@@ -214,30 +216,36 @@ def test_instance_tag_ec2(instance_tags_enabled, ec2_metadata, instance_tags_ec2
 @mock.patch("query_ec2_metadata.instance_tag")
 @mock.patch("query_ec2_metadata.ec2_metadata")
 @mock.patch("query_ec2_metadata.instance_tags_enabled")
-def test_instance_tags_metadata(instance_tags_enabled, ec2_metadata, instance_tag, instance_tags_ec2):
+def test_instance_tags_metadata(
+    instance_tags_enabled, ec2_metadata, instance_tag, instance_tags_ec2
+):
     instance_tags_enabled.return_value = True
-    ec2_metadata.return_value = 'Env\nName\nTestName'
-    instance_tag.side_effect = ['Test', 'TestInstance', 'test_instance_tags_metadata']
+    ec2_metadata.return_value = "Env\nName\nTestName"
+    instance_tag.side_effect = ["Test", "TestInstance", "test_instance_tags_metadata"]
 
     assert instance_tags() == {
-        'Env': 'Test',
-        'Name': 'TestInstance',
-        'TestName': 'test_instance_tags_metadata'
+        "Env": "Test",
+        "Name": "TestInstance",
+        "TestName": "test_instance_tags_metadata",
     }
-    ec2_metadata.assert_called_once_with('tags/instance')
+    ec2_metadata.assert_called_once_with("tags/instance")
     instance_tags_ec2.assert_not_called()
-    instance_tag.assert_has_calls([mock.call('Env'), mock.call('Name'), mock.call('TestName')])
+    instance_tag.assert_has_calls(
+        [mock.call("Env"), mock.call("Name"), mock.call("TestName")]
+    )
 
 
 @mock.patch("query_ec2_metadata.instance_tags_ec2")
 @mock.patch("query_ec2_metadata.instance_tag")
 @mock.patch("query_ec2_metadata.ec2_metadata")
 @mock.patch("query_ec2_metadata.instance_tags_enabled")
-def test_instance_tags_via_ec2(instance_tags_enabled, ec2_metadata, instance_tag, instance_tags_ec2):
+def test_instance_tags_via_ec2(
+    instance_tags_enabled, ec2_metadata, instance_tag, instance_tags_ec2
+):
     tags = {
-        'Env': 'Test',
-        'Name': 'TestInstance',
-        'TestName': 'test_instance_tags_metadata'
+        "Env": "Test",
+        "Name": "TestInstance",
+        "TestName": "test_instance_tags_metadata",
     }
 
     instance_tags_enabled.return_value = False
@@ -253,21 +261,22 @@ def test_instance_tags_via_ec2(instance_tags_enabled, ec2_metadata, instance_tag
 @mock_ec2
 @mock.patch("query_ec2_metadata.ec2_metadata")
 def test_instance_tags_ec2(ec2_metadata):
-    instance_id = 'i-0278698c48372092d'
+    instance_id = "i-0278698c48372092d"
     tags = {
-        'Env': 'Test',
-        'Name': 'TestInstance',
-        'TestName': 'test_instance_tags_metadata'
+        "Env": "Test",
+        "Name": "TestInstance",
+        "TestName": "test_instance_tags_metadata",
     }
 
-    ec2 = boto3.client('ec2', region_name='eu-west-2')
+    ec2 = boto3.client("ec2", region_name="eu-west-2")
     ec2.create_tags(
-        Resources=[instance_id],
-        Tags=[{'Key': k, 'Value': v} for k, v in tags.items()]
+        Resources=[instance_id], Tags=[{"Key": k, "Value": v} for k, v in tags.items()]
     )
 
-    ec2_metadata.side_effect = ['eu-west-2', instance_id]
+    ec2_metadata.side_effect = ["eu-west-2", instance_id]
 
     assert instance_tags_ec2() == tags
 
-    ec2_metadata.assert_has_calls([mock.call('placement/region'), mock.call('instance-id')])
+    ec2_metadata.assert_has_calls(
+        [mock.call("placement/region"), mock.call("instance-id")]
+    )
