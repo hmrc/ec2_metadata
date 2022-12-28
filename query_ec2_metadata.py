@@ -11,6 +11,19 @@ from requests.packages.urllib3 import Retry
 from requests.adapters import HTTPAdapter
 
 def instance_tags_ec2() -> Dict[str, str]:
+    """
+    All tags on this instance
+
+    This uses the ec2 api instead of the instance metadata to get the instance tags.
+    The instance will need ec2:DescribeTags permission
+
+    >>> instance_tags()
+    {
+        'Env': 'management',
+        'Name': 'bastion'
+    }
+    """
+
     import boto3
 
     ec2 = boto3.client('ec2', region_name=ec2_metadata('placement/region'))
@@ -27,6 +40,21 @@ def instance_tags_ec2() -> Dict[str, str]:
         tags |= {tag['Key']: tag['Value'] for tag in page['Tags']}
     return tags
 
+def instance_tags_enabled() -> bool:
+    """"
+    Detect if tags in instance metadata is enabled
+    """
+
+    try:
+        ec2_metadata('tags')
+    except HTTPError as http_error:
+        if http_error.response.status_code == 404:
+            # Tags in instance metadata is not enabled
+            return False
+        raise
+
+    return True
+
 def instance_tags() -> Dict[str, str]:
     """
     All tags on this instance
@@ -38,16 +66,13 @@ def instance_tags() -> Dict[str, str]:
     }
     """
 
-    try:
+    if instance_tags_enabled():
         return {
             tag_name: instance_tag(tag_name)
             for tag_name in ec2_metadata('tags/instance').splitlines()
         }
-    except HTTPError as http_error:
-        if http_error.response.status_code == 404:
-            # Perhaps tags through metadata is not enabled
-            return instance_tags_ec2()
-        raise
+    else:
+        return instance_tags_ec2()
 
 def instance_tag(tag: str) -> str:
     """
@@ -58,13 +83,10 @@ def instance_tag(tag: str) -> str:
 
     """
 
-    try:
+    if instance_tags_enabled():
         return ec2_metadata(f'tags/instance/{tag}')
-    except HTTPError as http_error:
-        if http_error.response.status_code == 404:
-            # Perhaps tags through metadata is not enabled
-            return instance_tags_ec2()[tag]
-        raise
+    else:
+        return instance_tags_ec2()[tag]
 
 def instance_identity_document() -> Dict[str, str]:
     """
