@@ -1,0 +1,3 @@
+httpretty
+moto[ec2]
+pytest

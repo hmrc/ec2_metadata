@@ -30,9 +30,19 @@ Usage:
 
   The key can be any of the data values from https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/instance-identity-documents.html
 
+### instance-tag
+
+Usage:
+  `instance-tag KEY`
+
+  This return the instance tag with the specified key. 
+  
+  This will use the metadata endpoint if tags in metadata is enabled. If it's not enabled, will try and use the EC2 API.
+
+
 ## Python module
 
-### instance_identity_document() -> Dict[str, str]:
+### instance_identity_document() -> dict[str, str]:
     
 This returns the identity document for the instance.
 
@@ -48,10 +58,10 @@ This returns an attribute from the instance metadata.
 
 The key can be any of the data values from https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/instancedata-data-categories.html
 
-### Development
+### instance_tags() -> dict[str, str]:
+    
+This returns all the tags on the instance. 
 
-* `make init` to set things up  
-* `make pytest` to run unit tests  
-* `make test` to run all tests  
-
-Remember to bump the version in `pyproject.toml` before merging.
+### instance_tag(key: str) -> str:
+    
+This returns the instance tag value for the specified key.

@@ -6,8 +6,88 @@ import sys
 from typing import Dict
 
 import requests
+from requests import HTTPError
 from requests.packages.urllib3 import Retry
 from requests.adapters import HTTPAdapter
+
+
+def instance_tags_ec2() -> Dict[str, str]:
+    """
+    All tags on this instance
+
+    This uses the ec2 api instead of the instance metadata to get the instance tags.
+    The instance will need ec2:DescribeTags permission
+
+    >>> instance_tags()
+    {
+        'Env': 'management',
+        'Name': 'bastion'
+    }
+    """
+
+    import boto3
+
+    ec2 = boto3.client("ec2", region_name=ec2_metadata("placement/region"))
+
+    id_filter = {"Name": "resource-id", "Values": [ec2_metadata("instance-id")]}
+
+    paginator = ec2.get_paginator("describe_tags")
+
+    tags: Dict[str, str] = {}
+    for page in paginator.paginate(Filters=[id_filter]):
+        tags |= {tag["Key"]: tag["Value"] for tag in page["Tags"]}
+    return tags
+
+
+def instance_tags_enabled() -> bool:
+    """
+    Detect if tags in instance metadata is enabled
+    """
+
+    try:
+        ec2_metadata("tags")
+    except HTTPError as http_error:
+        if http_error.response.status_code == 404:
+            # Tags in instance metadata is not enabled
+            return False
+        raise
+
+    return True
+
+
+def instance_tags() -> Dict[str, str]:
+    """
+    All tags on this instance
+
+    >>> instance_tags()
+    {
+        'Env': 'management',
+        'Name': 'bastion'
+    }
+    """
+
+    if instance_tags_enabled():
+        return {
+            tag_name: instance_tag(tag_name)
+            for tag_name in ec2_metadata("tags/instance").splitlines()
+        }
+    else:
+        return instance_tags_ec2()
+
+
+def instance_tag(tag: str) -> str:
+    """
+    Get the value of a specific tag
+
+    >>> instance_tag('Env')
+    'management'
+
+    """
+
+    if instance_tags_enabled():
+        return ec2_metadata(f"tags/instance/{tag}")
+    else:
+        return instance_tags_ec2()[tag]
 
 
 def instance_identity_document() -> Dict[str, str]:
@@ -56,24 +136,22 @@ def imds(path):
     retry_strategy = Retry(total=14, status_forcelist=[429], backoff_factor=0.01)
     adapter = HTTPAdapter(max_retries=retry_strategy)
 
-    http = requests.Session()
-    http.mount("http://", adapter)
+    session = requests.Session()
+    session.mount("http://", adapter)
 
-    token_response = http.put(
+    token_response = session.put(
         f"http://169.254.169.254/latest/api/token",
         headers={"X-aws-ec2-metadata-token-ttl-seconds": "300"},
         timeout=10,
     )
-    if token_response.status_code != 200:
-        raise Exception(token_response.content.decode())
+    token_response.raise_for_status()
 
-    response = http.get(
+    response = session.get(
         f"http://169.254.169.254/latest{path}",
         headers={"X-aws-ec2-metadata-token": token_response.content.decode()},
         timeout=10,
     )
-    if response.status_code != 200:
-        raise Exception(response.content.decode())
+    response.raise_for_status()
 
     return response.content.decode()
 
@@ -87,6 +165,8 @@ def main():
 
     if command_name == "instance-identity":
         sys.stdout.write(instance_identity(sys.argv[1]))
+    elif command_name == "instance-tag":
+        sys.stdout.write(instance_tag(sys.argv[1]))
     else:
         sys.stdout.write(ec2_metadata(sys.argv[1]))
 
