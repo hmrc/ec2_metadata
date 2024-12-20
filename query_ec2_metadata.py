@@ -7,8 +7,7 @@ from typing import Dict
 
 import requests
 from requests import HTTPError
-from requests.packages.urllib3 import Retry
-from requests.adapters import HTTPAdapter
+from requests.adapters import HTTPAdapter, Retry
 
 
 def instance_tags_ec2() -> Dict[str, str]:
