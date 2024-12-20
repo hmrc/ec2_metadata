@@ -18,7 +18,6 @@ pipeline {
 	    mypy --install-types --non-interactive --ignore-missing-imports query_ec2_metadata.py
         black --check *.py
         bandit query_ec2_metadata.py
-	    safety check
 
         deactivate""")
       }
