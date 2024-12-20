@@ -5,7 +5,7 @@ import boto3
 import httpretty
 import pytest
 import requests
-from moto import mock_ec2
+from moto import mock_aws
 from requests import HTTPError
 
 from query_ec2_metadata import (
@@ -258,7 +258,7 @@ def test_instance_tags_via_ec2(
     instance_tag.assert_not_called()
 
 
-@mock_ec2
+@mock_aws
 @mock.patch("query_ec2_metadata.ec2_metadata")
 def test_instance_tags_ec2(ec2_metadata):
     instance_id = "i-0278698c48372092d"
