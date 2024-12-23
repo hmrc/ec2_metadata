@@ -18,7 +18,16 @@ pipeline {
 	    mypy --install-types --non-interactive --ignore-missing-imports query_ec2_metadata.py
         black --check *.py
         bandit query_ec2_metadata.py
-	    safety check
+
+        # smoke test
+        pip install .
+        which ec2-metadata
+
+        METADATA_REGION=\$(ec2-metadata placement/region)
+        if [ "\$METADATA_REGION" != "eu-west-2" ]; then
+            echo "ec2-metadata returned unexpected region: \$METADATA_REGION"
+            exit 1
+        fi
 
         deactivate""")
       }
