@@ -4,6 +4,10 @@ pipeline {
     label 'docker'
   }
 
+  triggers {
+      cron('H 10 * * 1') // Every Monday at 10:00 AM
+  }
+
   stages {
     stage('Build') {
       steps {
